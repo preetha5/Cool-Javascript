@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find US cities by population</title>
+    <style>
+        body{
+            background: #fcc600;
+            box-sizing: border-box;
+            font-family: 'Helvetica', sans-serif;
+            margin, padding: 0;
+            font-weight: 200;
+            font-size: 1em;
+        }
+        
+        input {
+          width: 100%;
+          padding:20px;
+        }
+
+    .searchForm {
+      max-width:400px;
+      margin:50px auto;
+        }
+        
+        input.search{
+            padding: 1.2em;
+            text-align: center;
+            font-size: 2em;
+              position: relative;
+              top: 10px;
+              z-index: 2;
+            border: solid 8px #eee;
+            border-radius: 4px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.12), inset 0 0 2px rgba(0, 0, 0, 0.19);
+        }
+    
+        .suggestions{
+            margin: 0;
+          padding: 0;
+            left: 12%;
+          position: relative;
+        }
+        
+        .suggestions li{
+            list-style-type: none;
+            padding: 20px;
+            background: #fff;
+            margin: 0;
+            border-bottom: 1px solid #D8D8D8;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.14);
+            display: flex;
+            justify-content: space-between;
+            transition: background 2s;
+            text-transform: capitalize;
+        }
+        
+        .suggestions li:nth-child(even) {
+      transform: perspective(100px) rotateX(3deg) translateY(2px) scale(1.001);
+      background: linear-gradient(to bottom,  #ffffff 0%,#EFEFEF 100%);
+    }
+    .suggestions li:nth-child(odd) {
+      transform: perspective(100px) rotateX(-3deg) translateY(3px);
+      background: linear-gradient(to top,  #ffffff 0%,#EFEFEF 100%);
+    }
+        .city{
+            text-align: left;
+        }
+        
+        .population{
+                text-align: right;
+              font-size: 15px;
+        }
+
+        .hl{
+            background-color: #fcc600;
+        }
+    </style>
+</head>
+<body>
+    <form class="searchForm">
+        <input type="text" class="search" for="city" placeholder="City or State">
+        <ul class="suggestions">
+            <li>Filter by City</li>
+            <li>Filter by State</li>
+        </ul>
+    </form>
+    
+    <script>
+    const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+        
+    const cities=[];
+        
+    fetch(endpoint)
+        .then(blob=>blob.json())
+        .then(data=>cities.push(...data));
+    
+    function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+        
+    function findMatches(word,cities){
+        return cities.filter(place=>{
+            var regExp = new RegExp(word,'gi');
+        return place.city.match(regExp) || place.state.match(regExp) ;       
+        });
+    }
+        
+    function displayMatches(){
+        const matches = findMatches(this.value, cities);
+        const html = matches.map(place=>{
+            const regexp1 = new RegExp(this.value,'gi')
+            const hlCity = place.city.replace(regexp1,`<span class="hl">${this.value}</span>`)
+            const hlState = place.state.replace(regexp1,`<span class="hl">${this.value}</span>`)
+            return `
+                <li>
+                 <span class="city">${hlCity}, ${hlState}</span>
+                <span class="population">${numberWithCommas(place.population)}</span></li>`
+        }).join('');
+      suggestions.innerHTML=html;  
+    };
+    
+    var searchInput = document.querySelector('.search');
+    var suggestions = document.querySelector('.suggestions');
+
+    searchInput.addEventListener('change', displayMatches);
+    searchInput.addEventListener('keyup', displayMatches);
+        
+    </script>
+</body>
+</html>
